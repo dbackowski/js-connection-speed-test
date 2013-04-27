@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <title>Test prędkości</title>
+    <link href="/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="/css/design.css" rel="stylesheet">
+    <script src="/js/jquery-1.9.1.min.js"></script>
+    <script src="/js/jquery.ajax-progress.js"></script>
+    <script src="/js/jquery.percentageloader-0.1.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var downloadLoader = $("#download-progress").percentageLoader();
+        downloadLoader.setValue('10 MB');
+
+        var uploadLoader = $("#upload-progress").percentageLoader();
+        uploadLoader.setValue('10 MB');
+
+        var uploadTest = function() {
+          var uploadDataSize = 10485760;
+          var progressTimers = []
+          var uploadData = '';
+
+          for(var i = 0 ; i < uploadDataSize ; i++)
+          {
+            uploadData += ' ';
+          }
+
+          $.ajax({
+            xhr: function()
+            {
+              var xhr = new window.XMLHttpRequest();
+
+              xhr.upload.addEventListener("progress", function(evt){
+                if (evt.lengthComputable) {
+                  var percentComplete = evt.loaded / evt.total;
+                  progressTimers.push(new Date().getTime());
+                  uploadLoader.setProgress(percentComplete);
+                }
+              }, false);
+
+              return xhr;
+            },
+            url: "/",
+            cache: false,
+            processData: false,
+            type: "POST",
+            data: uploadData,
+            success: function(e)
+            {
+              var duration = (progressTimers[progressTimers.length - 1] - progressTimers[0]) / 1000;
+              var bitsLoaded = uploadDataSize * 8;
+              var speedBps = (bitsLoaded / duration).toFixed(2);
+              var speedKbps = (speedBps / 1024).toFixed(2);
+              var speedMbps = (speedKbps / 1024).toFixed(2);
+
+              $('#upload-time').html(duration);
+              $('#upload-speed').html(speedMbps);
+
+              $('button.run-test').removeClass('disabled');
+              $('button.run-test').prop('disabled', false);
+            },
+            error: function(e)
+            {
+              $('#upload-informations').html('Wystąpił błąd');
+            }
+          })
+        }
+
+        var downloadTest = function() {
+          var downloadDataSize = null;
+          var progressTimers = [];
+
+          $.ajax( {
+            xhr: function()
+            {
+              var xhr = new window.XMLHttpRequest();
+              xhr.addEventListener("progress", function(evt){
+                if (evt.lengthComputable) {
+                  var percentComplete = evt.loaded / evt.total;
+
+                  if (downloadDataSize == null)
+                  {
+                    downloadDataSize = evt.total;
+                  }
+
+                  progressTimers.push(new Date().getTime());
+                  downloadLoader.setProgress(percentComplete);
+                }
+              }, false);
+
+              return xhr;
+            },
+            url: "/10Mb.dat",
+            cache: false,
+            processData: false,
+            type: "GET",
+            success: function(e)
+            {
+              var duration = (progressTimers[progressTimers.length - 1] - progressTimers[0]) / 1000;
+
+              var bitsLoaded = downloadDataSize * 8;
+              var speedBps = (bitsLoaded / duration).toFixed(2);
+              var speedKbps = (speedBps / 1024).toFixed(2);
+              var speedMbps = (speedKbps / 1024).toFixed(2);
+
+              $('#download-time').html(duration);
+              $('#download-speed').html(speedMbps);
+
+              uploadTest();
+            },
+            error: function(e)
+            {
+              $('#download-informations').html('Wystąpił błąd');
+            }
+          });
+        }
+
+        $('button.run-test').on('click', function(){
+          $('#download-informations').html('');
+          downloadTest();
+          $(this).addClass('disabled');
+          $(this).prop('disabled', true);
+        });
+      });
+    </script>
+
+    <div class="container">
+      <div style="width: 50%; margin: 0 auto;">
+        <div class="text-center">
+          <h1>Test prędkości</h1>
+        </div>
+
+        <div class="pull-left">
+          <div class="text-center">
+            <h3>Pobieranie</h3>
+            <div id="download-progress"></div>
+            <div class="download-informations">
+              <p>
+                <b>Czas pobierania:</b>
+                <span id="download-time">0</span> s
+              </p>
+              <p>
+                <b>Predkość pobierania:</b>
+                <span id="download-speed">0</span> Mbps
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="pull-right">
+          <div class="text-center">
+            <h3>Wysyłanie</h3>
+            <div id="upload-progress"></div>
+            <div class="upload-informations">
+              <p>
+                <b>Czas wysyłania:</b>
+                <span id="upload-time">0</span> s
+              </p>
+              <p>
+                <b>Predkość wysyłania:</b>
+                <span id="upload-speed">0</span> Mbps
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="clearfix"></div>
+        <hr />
+
+        <div class="text-center">
+          <button class="btn btn-large btn-success run-test">Uruchom test</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
