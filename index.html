@@ -128,15 +128,15 @@
     </script>
 
     <div class="container">
-      <div style="width: 50%; margin: 0 auto;">
-        <div class="text-center">
-          <h1>Test prędkości</h1>
-        </div>
+      <div class="text-center">
+        <h1>Test prędkości</h1>
+      </div>
 
-        <div class="pull-left">
+      <div class="row">
+        <div class="span6">
           <div class="text-center">
             <h3>Pobieranie</h3>
-            <div id="download-progress"></div>
+            <div id="download-progress" style="width: 50%; margin: auto;"></div>
             <div class="download-informations">
               <p>
                 <b>Czas pobierania:</b>
@@ -149,10 +149,11 @@
             </div>
           </div>
         </div>
-        <div class="pull-right">
+
+        <div class="span6">
           <div class="text-center">
             <h3>Wysyłanie</h3>
-            <div id="upload-progress"></div>
+            <div id="upload-progress" style="width: 50%; margin: auto;"></div>
             <div class="upload-informations">
               <p>
                 <b>Czas wysyłania:</b>
@@ -165,13 +166,12 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="clearfix"></div>
-        <hr />
+      <hr />
 
-        <div class="text-center">
-          <button class="btn btn-large btn-success run-test">Uruchom test</button>
-        </div>
+      <div class="text-center">
+        <button class="btn btn-large btn-success run-test">Uruchom test</button>
       </div>
     </div>
   </body>
